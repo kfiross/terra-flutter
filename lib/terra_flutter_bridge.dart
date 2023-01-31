@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
-
-String convertToProperIsoFormat(DateTime date){
-      return date.toUtc().toIso8601String();
+String convertToProperIsoFormat(DateTime date) {
+  return date.toUtc().toIso8601String();
 }
 
 // SDK connections
@@ -168,14 +169,11 @@ class TerraFlutter {
   static const MethodChannel _channel = MethodChannel('terra_flutter_bridge');
 
   static Future<String?> testFunction(String text) async {
-    final String? version =
-        await _channel.invokeMethod('testFunction', {"text": text});
+    final String? version = await _channel.invokeMethod('testFunction', {"text": text});
     return version;
   }
 
-  static Future<bool?> initTerra(
-      String devID,
-      String referenceID) async {
+  static Future<bool?> initTerra(String devID, String referenceID) async {
     final bool? success = await _channel.invokeMethod('initTerra', {
       "devID": devID,
       "referenceID": referenceID,
@@ -183,29 +181,40 @@ class TerraFlutter {
     return success;
   }
 
+  static Future<String> generateAuthenticationToken(String devID, String apiKey) async {
+    var response = await http.post(
+      Uri.parse("https://api.tryterra.co/v2/auth/generateAuthToken"),
+      headers: {
+        'accept': 'application/json',
+        'dev-id': devID,
+        'x-api-key': apiKey,
+      },
+    );
+
+    if(response.statusCode != 200){
+      return throw Exception("Unauthed");
+    }
+    var json = jsonDecode(response.body) as Map<String, dynamic>;
+    return json['token'];
+  }
+
   static Future<bool?> initConnection(
-      Connection connection,
-      String token,
-      bool schedulerOn,
-      List<CustomPermission> customPermissions) async {
+      Connection connection, String token, bool schedulerOn, List<CustomPermission> customPermissions) async {
     final bool? success = await _channel.invokeMethod('initConnection', {
       "connection": connection.connectionString,
       "token": token,
       "schedulerOn": schedulerOn,
-      "customPermissions":
-          customPermissions.map((c) => c.customPermissionString).toList()
+      "customPermissions": customPermissions.map((c) => c.customPermissionString).toList()
     });
     return success;
   }
 
   static Future<String?> getUserId(Connection connection) async {
-    final String? userId = await _channel
-        .invokeMethod('getUserId', {"connection": connection.connectionString});
+    final String? userId = await _channel.invokeMethod('getUserId', {"connection": connection.connectionString});
     return userId;
   }
 
-  static Future<bool?> getActivity(
-      Connection connection, DateTime startDate, DateTime endDate) async {
+  static Future<bool?> getActivity(Connection connection, DateTime startDate, DateTime endDate) async {
     final bool? success = await _channel.invokeMethod('getActivity', {
       "connection": connection.connectionString,
       "startDate": convertToProperIsoFormat(startDate),
@@ -215,13 +224,11 @@ class TerraFlutter {
   }
 
   static Future<bool?> getAthlete(Connection connection) async {
-    final bool? success = await _channel.invokeMethod(
-        'getAthlete', {"connection": connection.connectionString});
+    final bool? success = await _channel.invokeMethod('getAthlete', {"connection": connection.connectionString});
     return success;
   }
 
-  static Future<bool?> getBody(
-      Connection connection, DateTime startDate, DateTime endDate) async {
+  static Future<bool?> getBody(Connection connection, DateTime startDate, DateTime endDate) async {
     final bool? success = await _channel.invokeMethod('getBody', {
       "connection": connection.connectionString,
       "startDate": convertToProperIsoFormat(startDate),
@@ -230,8 +237,7 @@ class TerraFlutter {
     return success;
   }
 
-  static Future<bool?> getDaily(
-      Connection connection, DateTime startDate, DateTime endDate) async {
+  static Future<bool?> getDaily(Connection connection, DateTime startDate, DateTime endDate) async {
     final bool? success = await _channel.invokeMethod('getDaily', {
       "connection": connection.connectionString,
       "startDate": convertToProperIsoFormat(startDate),
@@ -240,8 +246,7 @@ class TerraFlutter {
     return success;
   }
 
-    static Future<bool?> getMenstruation(
-      Connection connection, DateTime startDate, DateTime endDate) async {
+  static Future<bool?> getMenstruation(Connection connection, DateTime startDate, DateTime endDate) async {
     final bool? success = await _channel.invokeMethod('getMenstruation', {
       "connection": connection.connectionString,
       "startDate": convertToProperIsoFormat(startDate),
@@ -250,8 +255,7 @@ class TerraFlutter {
     return success;
   }
 
-  static Future<bool?> getNutrition(
-      Connection connection, DateTime startDate, DateTime endDate) async {
+  static Future<bool?> getNutrition(Connection connection, DateTime startDate, DateTime endDate) async {
     final bool? success = await _channel.invokeMethod('getNutrition', {
       "connection": connection.connectionString,
       "startDate": convertToProperIsoFormat(startDate),
@@ -260,8 +264,7 @@ class TerraFlutter {
     return success;
   }
 
-  static Future<bool?> getSleep(
-      Connection connection, DateTime startDate, DateTime endDate) async {
+  static Future<bool?> getSleep(Connection connection, DateTime startDate, DateTime endDate) async {
     final bool? success = await _channel.invokeMethod('getSleep', {
       "connection": connection.connectionString,
       "startDate": convertToProperIsoFormat(startDate),
@@ -278,6 +281,21 @@ class TerraFlutter {
   // only for apple
   static Future<String?> readGlucoseData() async {
     final String? success = await _channel.invokeMethod('readGlucoseData');
+    return success;
+  }
+
+  // extra
+  static Future updateHandler() async {
+    final String? success = await _channel.invokeMethod('updateHandler');
+    return success;
+  }
+
+  static Future disconnect(String userId, String devID, String apiKey) async {
+    final bool? success = await _channel.invokeMethod('disconnect', {
+      "user_id": userId,
+      "dev_id": devID,
+      "api_key": apiKey,
+    });
     return success;
   }
 }
