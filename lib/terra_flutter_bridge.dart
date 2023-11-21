@@ -75,6 +75,9 @@ enum CustomPermission {
   nutritionWater,
   nutritionCholesterol,
   menstruation,
+  speed,
+  power,
+  electrocardiogram,
 }
 
 extension CustomPermissionExtension on CustomPermission {
@@ -158,6 +161,12 @@ extension CustomPermissionExtension on CustomPermission {
         return 'NUTRITION_CHOLESTEROL';
       case CustomPermission.menstruation:
         return 'MENSTRUATION';
+      case CustomPermission.speed:
+        return "SPEED";
+      case CustomPermission.power:
+        return "POWER";
+      case CustomPermission.electrocardiogram:
+        return "ELECTROCARDIOGRAM";
       default:
         return 'UNDEFINED';
     }
@@ -222,6 +231,7 @@ class TerraFlutter {
   static Future<bool> isHealthConnectAvailable() async{
     return await _channel.invokeMethod("isHealthConnectAvailable");
   }
+  
   static Future<DataMessage?> getActivity(
       Connection connection, DateTime startDate, DateTime endDate, {bool toWebhook = true} ) async {
     return DataMessage.fromJson(Map<String, dynamic>.from(await _channel.invokeMethod('getActivity', {
