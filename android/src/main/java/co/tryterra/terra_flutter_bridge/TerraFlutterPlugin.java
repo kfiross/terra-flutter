@@ -452,13 +452,25 @@ public class TerraFlutterPlugin implements FlutterPlugin, MethodCallHandler, Act
           result
         );
         break;
+        case "disconnect":
+            disconnect(
+              result,
+              call.argument("user_id"),
+              call.argument("dev_id"),
+              call.argument("api_key")
+            );
       default:
         result.notImplemented();
         break;
     }
   }
 
-  @Override
+    private void disconnect(Result result, String userId ,String devId, String apiKey) {
+      Terra.Companion.disconnect(userId, devId, apiKey);
+
+    }
+
+    @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     channel.setMethodCallHandler(null);
   }

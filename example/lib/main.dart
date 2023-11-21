@@ -30,7 +30,7 @@ class _MyAppState extends State<MyApp> {
     SuccessMessage? initialised;
     SuccessMessage? connected;
     UserId? testText;
-    Connection c = Connection.appleHealth;
+    Connection c = Connection.samsung;
     // Function messages may fail, so we use a try/catch Exception.
     // We also handle the message potentially returning null.
     // USE YOUR OWN CATCH BLOCKS
